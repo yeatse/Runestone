@@ -1214,7 +1214,7 @@ extension TextInputView {
         guard newString != string else {
             return
         }
-        guard let oldString = stringView.string.copy() as? NSString else {
+        guard let oldString = stringView.string.copy() as? String else {
             return
         }
         timedUndoManager.endUndoGrouping()
@@ -1225,7 +1225,7 @@ extension TextInputView {
         timedUndoManager.beginUndoGrouping()
         timedUndoManager.setActionName(L10n.Undo.ActionName.replaceAll)
         timedUndoManager.registerUndo(withTarget: self) { textInputView in
-            textInputView.setStringWithUndoAction(oldString)
+            textInputView.setStringWithUndoAction(oldString as NSString)
         }
         timedUndoManager.endUndoGrouping()
         delegate?.textInputViewDidChange(self)

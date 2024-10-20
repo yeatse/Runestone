@@ -46,9 +46,10 @@ final class TreeSitterInternalLanguageMode: InternalLanguageMode {
     func parse(_ text: NSString, completion: @escaping ((Bool) -> Void)) {
         operationQueue.cancelAllOperations()
         let operation = BlockOperation()
+        let text = text as String
         operation.addExecutionBlock { [weak operation, weak self] in
             if let self = self, let operation = operation, !operation.isCancelled {
-                self.parse(text)
+                self.parse(text as NSString)
                 DispatchQueue.main.async {
                     completion(!operation.isCancelled)
                 }
