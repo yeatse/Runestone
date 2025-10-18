@@ -81,8 +81,10 @@ private extension TSInputEncoding {
         switch self {
         case TSInputEncodingUTF8:
             return .utf8
-        case TSInputEncodingUTF16:
-            return String.preferredUTF16Encoding
+        case TSInputEncodingUTF16LE:
+            return .utf16LittleEndian
+        case TSInputEncodingUTF16BE:
+            return .utf16BigEndian
         default:
             return nil
         }
