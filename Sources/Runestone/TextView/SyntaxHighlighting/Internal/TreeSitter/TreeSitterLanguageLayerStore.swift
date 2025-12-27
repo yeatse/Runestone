@@ -1,63 +1,58 @@
 import Foundation
+import os.lock
 
 final class TreeSitterLanguageLayerStore {
     var allIDs: [UnsafeRawPointer] {
-        defer {
-            semaphore.signal()
+        withLock {
+            Array(store.keys)
         }
-        semaphore.wait()
-        return Array(store.keys)
     }
 
     var allLayers: [TreeSitterLanguageLayer] {
-        defer {
-            semaphore.signal()
+        withLock {
+            Array(store.values)
         }
-        semaphore.wait()
-        return Array(store.values)
     }
 
     var isEmpty: Bool {
-        defer {
-            semaphore.signal()
+        withLock {
+            store.isEmpty
         }
-        semaphore.wait()
-        return store.isEmpty
     }
 
     private var store: [UnsafeRawPointer: TreeSitterLanguageLayer] = [:]
-    private let semaphore = DispatchSemaphore(value: 1)
+    // Use os_unfair_lock for priority inheritance to reduce QoS inversions.
+    private var lock = os_unfair_lock_s()
 
     func storeLayer(_ layer: TreeSitterLanguageLayer, forKey key: UnsafeRawPointer) {
-        defer {
-            semaphore.signal()
+        withLock {
+            store[key] = layer
         }
-        semaphore.wait()
-        store[key] = layer
     }
 
     func layer(forKey key: UnsafeRawPointer) -> TreeSitterLanguageLayer? {
-        defer {
-            semaphore.signal()
+        withLock {
+            store[key]
         }
-        semaphore.wait()
-        let value = store[key]
-        return value
     }
 
     func removeLayer(forKey key: UnsafeRawPointer) {
-        defer {
-            semaphore.signal()
+        withLock {
+            store.removeValue(forKey: key)
         }
-        semaphore.wait()
-        store.removeValue(forKey: key)
     }
 
     func removeAll() {
-        defer {
-            semaphore.signal()
+        withLock {
+            store.removeAll()
         }
-        semaphore.wait()
-        store.removeAll()
+    }
+
+    private func withLock<T>(_ body: () throws -> T) rethrows -> T {
+        os_unfair_lock_lock(&lock)
+        defer {
+            os_unfair_lock_unlock(&lock)
+        }
+        return try body()
     }
 }

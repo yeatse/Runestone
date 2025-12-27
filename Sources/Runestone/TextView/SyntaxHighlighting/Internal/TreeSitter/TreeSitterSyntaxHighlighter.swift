@@ -70,6 +70,7 @@ final class TreeSitterSyntaxHighlighter: LineSyntaxHighlighter {
                 }
             }
         }
+        currentOperation?.cancel()
         currentOperation = operation
         operationQueue.addOperation(operation)
     }
